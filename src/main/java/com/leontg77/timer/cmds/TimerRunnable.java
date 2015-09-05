@@ -61,7 +61,7 @@ public class TimerRunnable implements Runnable {
     public void run() {
         // send to all
         try {
-            sender.sendToAll(message + " " + TimeUtils.timeToString(ticksRemaining));
+            sender.sendToAll(message + (countdown ? " " + TimeUtils.timeToString(ticksRemaining) : ""));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
