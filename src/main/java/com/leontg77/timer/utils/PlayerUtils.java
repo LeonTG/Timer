@@ -1,11 +1,10 @@
 package com.leontg77.timer.utils;
 
-import java.lang.reflect.Constructor;
-
+import com.leontg77.timer.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.leontg77.timer.Main;
+import java.lang.reflect.Constructor;
 
 /**
  * Player utilities class
@@ -24,9 +23,9 @@ public class PlayerUtils {
 	 */
 	public static void sendAction(Player player, String message) {
 		try {
-			Object msg = PacketUtils.getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, "{text:'" + message + "'}");
+			Object msg = ReflectionUtils.getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, "{text:'" + message + "'}");
 
-			Constructor<?> constructor = PacketUtils.getNMSClass("PacketPlayOutChat").getConstructor(PacketUtils.getNMSClass("IChatBaseComponent"), byte.class);
+			Constructor<?> constructor = ReflectionUtils.getNMSClass("PacketPlayOutChat").getConstructor(ReflectionUtils.getNMSClass("IChatBaseComponent"), byte.class);
 			Object packet = constructor.newInstance(msg, (byte) 2);
 
 			PacketUtils.sendPacket(player, packet);
