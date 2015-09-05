@@ -3,7 +3,6 @@ package com.leontg77.timer;
 import com.leontg77.timer.cmds.TimerCommand;
 import com.leontg77.timer.packets.ActionSender;
 import com.leontg77.timer.packets.PacketSender;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,9 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author LeonTG77
  */
 public class Main extends JavaPlugin {
-
-	// Prefix to use when sending messages
-	public static final String PREFIX = "" + ChatColor.RED + ChatColor.BOLD + "Timer " + ChatColor.DARK_GRAY + "» " + ChatColor.GRAY;
 
 	@Override
 	public void onDisable() {
