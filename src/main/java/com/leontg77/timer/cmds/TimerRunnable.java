@@ -38,7 +38,7 @@ public class TimerRunnable implements Runnable {
         this.ticksRemaining = seconds;
         this.message = message;
 
-        this.ticksRemaining = seconds * 20;
+        this.ticksRemaining = seconds;
         this.countdown = seconds > -1;
         this.message = message;
 

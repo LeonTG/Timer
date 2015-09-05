@@ -64,14 +64,13 @@ public class TimerCommand implements CommandExecutor {
 		}
 
 		// read the amount of time to run for
-		int time;
+		int seconds;
 		try {
-			time = Integer.parseInt(args[0]);
+			seconds = Integer.parseInt(args[0]);
 		} catch (NumberFormatException e) {
 			sender.sendMessage(PREFIX + "Invaild time.");
 			return true;
 		}
-		long ticks = (time + 1);
 
 		// build the message from the arguments
 		String message = Joiner.on(' ').join(Arrays.copyOfRange(args, 1, args.length));
@@ -80,7 +79,7 @@ public class TimerCommand implements CommandExecutor {
 		message = ChatColor.translateAlternateColorCodes('&', message);
 
 		// start the countdown timer
-		timer.startSendingMessage(message, ticks);
+		timer.startSendingMessage(message, seconds);
 
 		sender.sendMessage(PREFIX + "Timer started.");
 		return true;
