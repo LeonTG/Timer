@@ -1,11 +1,11 @@
 package com.leontg77.timer;
 
-import java.util.logging.Logger;
-
+import com.leontg77.timer.cmds.TimerCommand;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.leontg77.timer.cmds.TimerCommand;
+import java.util.logging.Logger;
 
 /**
  * Main class of the UHC plugin.
@@ -15,9 +15,13 @@ import com.leontg77.timer.cmds.TimerCommand;
  * @author LeonTG77
  */
 public class Main extends JavaPlugin {
+
 	private Logger logger = getLogger();
 	public static Main plugin;
-	
+
+	// Prefix to use when sending messages
+	public static final String PREFIX = "" + ChatColor.RED + ChatColor.BOLD + "Timer " + ChatColor.DARK_GRAY + "» " + ChatColor.GRAY;
+
 	@Override
 	public void onDisable() {
 		PluginDescriptionFile file = getDescription();
@@ -34,13 +38,5 @@ public class Main extends JavaPlugin {
 		plugin = this;
 
 		getCommand("timer").setExecutor(new TimerCommand());
-	}
-	
-	/**
-	 * Get the timer plugin prefix.
-	 * @return The timer prefix.
-	 */
-	public static String prefix() {
-		return "§c§lTimer §8» §7";
 	}
 }

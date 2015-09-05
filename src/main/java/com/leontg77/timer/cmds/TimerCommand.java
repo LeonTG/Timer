@@ -27,12 +27,12 @@ public class TimerCommand implements CommandExecutor {
 		if (cmd.getName().equalsIgnoreCase("timer")) {
 			if (sender.hasPermission("uhc.timer")) {
 				if (args.length == 0) {
-					sender.sendMessage(Main.prefix() + "Usage: /timer <seconds> <message>");
+					sender.sendMessage(Main.PREFIX + "Usage: /timer <seconds> <message>");
 					return true;
 				}
 				
 				if (args.length == 1 && !args[0].equalsIgnoreCase("cancel")) {
-					sender.sendMessage(Main.prefix() + "Usage: /timer <seconds> <message>");
+					sender.sendMessage(Main.PREFIX + "Usage: /timer <seconds> <message>");
 					return true;
 				}
 
@@ -45,7 +45,7 @@ public class TimerCommand implements CommandExecutor {
 					run.cancel();
 					run = null;
 					
-					sender.sendMessage(Main.prefix() + "Timer cancelled.");
+					sender.sendMessage(Main.PREFIX + "Timer cancelled.");
 					return true;
 				}
 
@@ -101,9 +101,9 @@ public class TimerCommand implements CommandExecutor {
 				this.message = ChatColor.translateAlternateColorCodes('&', msg.toString().trim());
 				this.ticks = (time + 1);
 				
-				sender.sendMessage(Main.prefix() + "Timer started.");
+				sender.sendMessage(Main.PREFIX + "Timer started.");
 			} else {
-				sender.sendMessage(Main.prefix() + "You can't use that command.");
+				sender.sendMessage(Main.PREFIX + "You can't use that command.");
 			}
 		}
 		return true;
