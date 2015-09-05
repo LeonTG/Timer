@@ -1,6 +1,7 @@
 package com.leontg77.timer;
 
 import com.leontg77.timer.cmds.TimerCommand;
+import com.leontg77.timer.cmds.TimerRunnable;
 import com.leontg77.timer.packets.ActionSender;
 import com.leontg77.timer.packets.PacketSender;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -30,8 +31,9 @@ public class Main extends JavaPlugin {
 		try {
 			PacketSender packetSender = new PacketSender();
 			ActionSender actionSender = new ActionSender(packetSender);
+			TimerRunnable timer = new TimerRunnable(this ,actionSender);
 
-			getCommand("timer").setExecutor(new TimerCommand(this, actionSender));
+			getCommand("timer").setExecutor(new TimerCommand(timer));
 		} catch (Exception e) {
 			e.printStackTrace();
 			getLogger().severe("Could not set up sending of action packets, are you using 1.8 or higher?");
