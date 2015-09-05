@@ -1,16 +1,14 @@
 package com.leontg77.timer.cmds;
 
-import org.bukkit.Bukkit;
+import com.leontg77.timer.Main;
+import com.leontg77.timer.packets.ActionSender;
+import com.leontg77.timer.utils.TimeUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import com.leontg77.timer.Main;
-import com.leontg77.timer.utils.PlayerUtils;
-import com.leontg77.timer.utils.TimeUtils;
 
 /**
  * Timer command class
@@ -22,7 +20,15 @@ public class TimerCommand implements CommandExecutor {
 	private BukkitRunnable run;
 	private String message;
 	private int ticks;
-	
+
+	protected final ActionSender actionSender;
+	protected final Plugin plugin;
+
+	public TimerCommand(Plugin plugin, ActionSender actionSender) {
+		this.actionSender = actionSender;
+		this.plugin = plugin;
+	}
+
 	public boolean onCommand(final CommandSender sender, Command cmd, String label,String[] args) {
 		if (cmd.getName().equalsIgnoreCase("timer")) {
 			if (sender.hasPermission("uhc.timer")) {
@@ -79,9 +85,12 @@ public class TimerCommand implements CommandExecutor {
 					public void run() {
 						if (countdown) {
 							ticks--;
-							
-							for (Player online : Bukkit.getServer().getOnlinePlayers()) {
-								PlayerUtils.sendAction(online, message + " " + TimeUtils.timeToString(ticks)); 
+
+							try {
+								actionSender.sendToAll(message + " " + TimeUtils.timeToString(ticks));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+								plugin.getLogger().severe("Could not send action packets, are you using 1.8 or higher?");
 							}
 							
 							if (ticks == 0) {
@@ -90,13 +99,16 @@ public class TimerCommand implements CommandExecutor {
 								return;
 							}
 						} else {
-							for (Player online : Bukkit.getServer().getOnlinePlayers()) {
-								PlayerUtils.sendAction(online, message); 
+							try {
+								actionSender.sendToAll(message + " " + TimeUtils.timeToString(ticks));
+							} catch (Exception ex) {
+								ex.printStackTrace();
+								plugin.getLogger().severe("Could not send action packets, are you using 1.8 or higher?");
 							}
 						}
 					}
 				};
-				run.runTaskTimer(Main.plugin, 0, 20);
+				run.runTaskTimer(plugin, 0, 20);
 				
 				this.message = ChatColor.translateAlternateColorCodes('&', msg.toString().trim());
 				this.ticks = (time + 1);
