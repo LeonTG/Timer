@@ -122,7 +122,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             toReturn.add("cancel");
         }
 
-        if (args.length == 1) {
+        if (args.length == 2) {
             toReturn.addAll(Bukkit.getOnlinePlayers()
                     .stream()
                     .map(Player::getName)
