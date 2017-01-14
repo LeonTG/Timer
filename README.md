@@ -2,7 +2,7 @@
 
 **Description:**
 
-This plugin adds a timer that will countdown in the action bar of players. The timer supports color codes and you need to use "&<code>"
+This plugin adds a timer that will countdown in the action bar of players. The timer supports color codes and you need to use &(colorcode)
 
 *This plugin requires MC 1.8+ and Java 8!!*
 
