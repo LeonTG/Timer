@@ -16,7 +16,7 @@ ___
 
 **Permissions:**
 
-`timer.manage` - *Permission to use* `/timer`*.
+`timer.manage` - *Permission to use* `/timer`*.*
 ___
 
 [**Download**](https://github.com/LeonTG77/ActionTimer/releases)
