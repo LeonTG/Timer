@@ -2,15 +2,17 @@
 
 **Description:**
 
-This plugin adds a timer that will countdown in the action bar of players.
+This plugin adds a timer that will countdown in the action bar of players. The timer supports color codes and you need to use "&<code>"
+
+*This plugin requires MC 1.8+ and Java 8!!*
 
 ___
 
 **Commands:**
 
-`/timer <seconds> <message>` - *Start a timer that counts down for the given seconds and starts with the given message*
+`/timer <seconds> <message>` - *Start a timer that counts down for the given seconds and starts with the given message.*
 
-`/timer -1 <message>` - *This will make it so the message will stay in the chat permanent until cancelled with no countdown*
+`/timer -1 <message>` - *This will make it so the message will stay in the chat permanent until cancelled with no countdown.*
 
 `/timer cancel` - *This stops the timer if it's running.*
 

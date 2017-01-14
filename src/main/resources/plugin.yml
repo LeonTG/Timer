@@ -1,9 +1,9 @@
-name: Timer
-main: com.leontg77.timer.Main
-version: 1.1
+name: ${project.name}
+main: ${project.groupId}.${project.artifactId}.Main
+version: ${project.version}
 author: LeonTG77
-description: Cool timer plugin for 1.8 uhcs
+description: This plugin adds a timer that will countdown in the action bar of players.
 
 commands:
   timer:
-    description: Timer command, check usage.
+    description: Timer command, check usaged.
