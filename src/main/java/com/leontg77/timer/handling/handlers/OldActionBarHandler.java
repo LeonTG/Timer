@@ -29,7 +29,7 @@ public class OldActionBarHandler implements TimerHandler {
     }
 
     @Override
-    public void sendText(String text) {
+    public void sendText(String text, int remaining, int total) {
         try {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 Object chat = componentConstructor.newInstance(text); // make a new chat message
@@ -43,7 +43,7 @@ public class OldActionBarHandler implements TimerHandler {
     }
 
     @Override
-    public void startTimer() {}
+    public void startTimer(String text) {}
 
     @Override
     public void onCancel() {}

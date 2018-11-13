@@ -10,8 +10,10 @@ public interface TimerHandler {
 
     /**
      * Start the timer handler.
+     *
+     * @param text The text to display on it.
      */
-    void startTimer();
+    void startTimer(String text);
 
     /**
      * Stop the timer handler.
@@ -22,6 +24,8 @@ public interface TimerHandler {
      * Send a new packet of the text for the timer handler.
      *
      * @param text The new text.
+     * @param remaining The amount of seconds remaining.
+     * @param total The total amount of seconds for the timer.
      */
-    void sendText(String text);
+    void sendText(String text, int remaining, int total);
 }

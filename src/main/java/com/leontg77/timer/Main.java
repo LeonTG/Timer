@@ -28,9 +28,17 @@
 package com.leontg77.timer;
 
 import com.leontg77.timer.commands.TimerCommand;
+import com.leontg77.timer.handling.TimerHandler;
+import com.leontg77.timer.handling.handlers.BossBarHandler;
+import com.leontg77.timer.handling.handlers.NewActionBarHandler;
+import com.leontg77.timer.handling.handlers.OldActionBarHandler;
 import com.leontg77.timer.runnable.TimerRunnable;
 import com.leontg77.timer.handling.PacketSender;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 /**
  * Main class of the plugin.
@@ -42,52 +50,44 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		try {
-			PacketSender packetSender = new PacketSender();
+		reloadConfig();
+		TimerRunnable timer;
 
-			TimerRunnable timer = new TimerRunnable(this, handler);
-			getCommand("timer").setExecutor(new TimerCommand(timer));
+		try {
+			timer = setupTimer();
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			getLogger().severe("Could not set up sending of action packets, are you using 1.8 or higher?");
+			getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);
 			setEnabled(false);
+			return;
 		}
+
+		getCommand("timer").setExecutor(new TimerCommand(timer));
 	}
 
-	private static final long SECONDS_PER_HOUR = 3600;
-	private static final long SECONDS_PER_MINUTE = 60;
+    /**
+     * Setup the timer runnable object.
+     *
+     * @return The created timer runnable.
+     * @throws NoSuchMethodException If no methods exist for sending packets or handling the timer.
+     * @throws NoSuchFieldException If no fields exist for sending packets or handling the timer.
+     * @throws ClassNotFoundException If no classes exist for sending packets or handling the timer.
+     */
+	private TimerRunnable setupTimer() throws NoSuchMethodException, NoSuchFieldException, ClassNotFoundException {
+		PacketSender packetSender = new PacketSender();
+		FileConfiguration config = getConfig();
 
-	/**
-	 * Converts the seconds into a string with hours, minutes and seconds.
-	 *
-	 * @param ticks the number of seconds.
-	 * @return The converted seconds.
-	 */
-	public String timeToString(long ticks) {
-		int hours = (int) Math.floor(ticks / (double) SECONDS_PER_HOUR);
-		ticks -= hours * SECONDS_PER_HOUR;
+		if (config.getBoolean("bossbar.enabled")) {
+			try {
+				return new TimerRunnable(this, new BossBarHandler(config.getString("bossbar.color", "pink"), config.getString("bossbar.style", "solid")));
+			} catch (Exception ignored) {}
 
-		int minutes = (int) Math.floor(ticks / (double) SECONDS_PER_MINUTE);
-		ticks -= minutes * SECONDS_PER_MINUTE;
-
-		int seconds = (int) ticks;
-
-		StringBuilder output = new StringBuilder();
-
-		if (hours > 0) {
-			output.append(hours).append('h');
-
-			if (minutes == 0) {
-				output.append(minutes).append('m');
-			}
+			getLogger().warning("BossBars are not supported in pre Minecraft 1.9, defaulting to action bar.");
 		}
 
-		if (minutes > 0) {
-			output.append(minutes).append('m');
+		try {
+			return new TimerRunnable(this, new NewActionBarHandler(packetSender));
+		} catch (Exception ex) {
+			return new TimerRunnable(this, new OldActionBarHandler(packetSender));
 		}
-
-		output.append(seconds).append('s');
-
-		return output.toString();
 	}
 }

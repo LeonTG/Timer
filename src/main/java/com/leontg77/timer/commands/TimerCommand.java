@@ -89,7 +89,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (timer.isRunning()) {
-            sender.sendMessage(ChatColor.RED + "The action bar timer is already running, cancel with /timer cancel.");
+            sender.sendMessage(ChatColor.RED + "The timer is already running, cancel with /timer cancel.");
             return true;
         }
 
