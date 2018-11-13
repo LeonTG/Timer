@@ -30,7 +30,7 @@ package com.leontg77.timer.commands;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.leontg77.timer.Main;
-import com.leontg77.timer.managers.TimerRunnable;
+import com.leontg77.timer.runnable.TimerRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 /**
  * Timer command class.
  *
- * @author LeonTG77
+ * @author LeonTG
  */
 public class TimerCommand implements CommandExecutor, TabCompleter {
     private final TimerRunnable timer;

@@ -4,22 +4,79 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.arcticmc</groupId>
-    <artifactId>ArcticMC</artifactId>
-    <packaging>pom</packaging>
+    <groupId>com.leontg77</groupId>
+    <artifactId>timer</artifactId>
     <version>2.0</version>
-    <modules>
-        <module>api</module>
-        <module>plugin</module>
-        <module>1_8_R1</module>
-        <module>1_8_R2</module>
-        <module>1_8_R3</module>
-        <module>1_9_R1</module>
-        <module>1_9_R2</module>
-        <module>1_10_R1</module>
-        <module>1_11_R1</module>
-        <module>1_12_R1</module>
-        <module>1_13_R1</module>
-        <module>1_13_R2</module>
-    </modules>
+    <name>Timer</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jar.finalName>${project.name}</jar.finalName>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>paperspigot</artifactId>
+            <version>1.8.8</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- Build configuration taken from https://github.com/Eluinhost/UHC -->
+
+    <build>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>plugin.yml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <!-- Value is inverted for some reason -->
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <minimizeJar>true</minimizeJar>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.apache.commons.csv</pattern>
+                            <shadedPattern>${project.groupId}.${project.artifactId}.shaded.csv</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
