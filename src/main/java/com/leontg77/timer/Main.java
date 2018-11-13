@@ -1,10 +1,10 @@
 /*
- * Project: ActionTimer
+ * Project: Timer
  * Class: com.leontg77.timer.Main
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Leon Vaktskjold <leontg77@gmail.com>.
+ * Copyright (c) 2016-2018 Leon Vaktskjold <leontg77@gmail.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,14 @@
 package com.leontg77.timer;
 
 import com.leontg77.timer.commands.TimerCommand;
-import com.leontg77.timer.handling.TimerHandler;
 import com.leontg77.timer.handling.handlers.BossBarHandler;
 import com.leontg77.timer.handling.handlers.NewActionBarHandler;
 import com.leontg77.timer.handling.handlers.OldActionBarHandler;
 import com.leontg77.timer.runnable.TimerRunnable;
 import com.leontg77.timer.handling.PacketSender;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Level;
@@ -50,44 +50,57 @@ public class Main extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		reloadConfig();
-		TimerRunnable timer;
+        reloadConfig();
+        getCommand("timer").setExecutor(new TimerCommand(this));
+    }
 
-		try {
-			timer = setupTimer();
-		} catch (Exception ex) {
-			getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);
-			setEnabled(false);
-			return;
-		}
-
-		getCommand("timer").setExecutor(new TimerCommand(timer));
-	}
+	private TimerRunnable runnable = null;
 
     /**
-     * Setup the timer runnable object.
+     * Get the current runnable for the timer.
      *
-     * @return The created timer runnable.
-     * @throws NoSuchMethodException If no methods exist for sending packets or handling the timer.
-     * @throws NoSuchFieldException If no fields exist for sending packets or handling the timer.
-     * @throws ClassNotFoundException If no classes exist for sending packets or handling the timer.
+     * @return The current runnable.
      */
-	private TimerRunnable setupTimer() throws NoSuchMethodException, NoSuchFieldException, ClassNotFoundException {
-		PacketSender packetSender = new PacketSender();
-		FileConfiguration config = getConfig();
+    public TimerRunnable getRunnable() {
+        return runnable;
+    }
 
-		if (config.getBoolean("bossbar.enabled")) {
-			try {
-				return new TimerRunnable(this, new BossBarHandler(config.getString("bossbar.color", "pink"), config.getString("bossbar.style", "solid")));
-			} catch (Exception ignored) {}
+	@Override
+	public void reloadConfig() {
+		super.reloadConfig();
 
-			getLogger().warning("BossBars are not supported in pre Minecraft 1.9, defaulting to action bar.");
-		}
+		if (getConfig().getConfigurationSection("bossbar") == null) {
+            getConfig().set("bossbar.enabled", true);
+            getConfig().set("bossbar.color", "pink");
+            getConfig().set("bossbar.style", "solid");
+            saveConfig();
+        }
 
-		try {
-			return new TimerRunnable(this, new NewActionBarHandler(packetSender));
-		} catch (Exception ex) {
-			return new TimerRunnable(this, new OldActionBarHandler(packetSender));
-		}
+		if (runnable != null && runnable.getHandler() instanceof Listener) {
+            HandlerList.unregisterAll((Listener) runnable.getHandler());
+        }
+
+        try {
+            PacketSender packetSender = new PacketSender();
+            FileConfiguration config = getConfig();
+
+            if (config.getBoolean("bossbar.enabled")) {
+                try {
+                    runnable = new TimerRunnable(this, new BossBarHandler(this, config.getString("bossbar.color", "pink"), config.getString("bossbar.style", "solid")));
+                    return;
+                } catch (Exception ignored) {}
+
+                getLogger().warning("BossBars are not supported in pre Minecraft 1.9, defaulting to action bar.");
+            }
+
+            try {
+                runnable = new TimerRunnable(this, new NewActionBarHandler(packetSender));
+            } catch (Exception ex) {
+                runnable = new TimerRunnable(this, new OldActionBarHandler(packetSender));
+            }
+        } catch (Exception ex) {
+            getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);
+            setEnabled(false);
+        }
 	}
 }

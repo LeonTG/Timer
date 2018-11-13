@@ -1,10 +1,10 @@
 /*
- * Project: ActionTimer
- * Class: com.leontg77.timer.managers.TimerRunnable
+ * Project: Timer
+ * Class: com.leontg77.timer.runnable.TimerRunnable
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Leon Vaktskjold <leontg77@gmail.com>.
+ * Copyright (c) 2016-2018 Leon Vaktskjold <leontg77@gmail.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,12 @@ package com.leontg77.timer.runnable;
 
 import com.leontg77.timer.Main;
 import com.leontg77.timer.handling.TimerHandler;
+import com.leontg77.timer.handling.handlers.BossBarHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Timer runnable class.
@@ -44,6 +48,10 @@ public class TimerRunnable implements Runnable {
     public TimerRunnable(Main plugin, TimerHandler handler) {
         this.handler = handler;
         this.plugin = plugin;
+
+        if (handler instanceof Listener) {
+            Bukkit.getPluginManager().registerEvents((Listener) handler, plugin);
+        }
     }
 
     private boolean countdown = true;
@@ -56,10 +64,12 @@ public class TimerRunnable implements Runnable {
 
     @Override
     public void run() {
-        try {
-            handler.sendText(message + (countdown ? " " + timeToString(remaining) : ""), remaining, total);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (handler instanceof BossBarHandler) {
+            ((BossBarHandler) handler).updateProgress(remaining, total);
+        }
+
+        if (remaining % 20 == 0) {
+            handler.sendText(message + (countdown ? " " + timeToString(remaining / 20) : ""));
         }
 
         if (countdown) {
@@ -82,16 +92,16 @@ public class TimerRunnable implements Runnable {
      * @param seconds the amount of seconds to send the message for
      */
     public void startSendingMessage(String message, int seconds) {
-        this.remaining = seconds;
-        this.total = seconds;
+        this.remaining = (seconds * 20);
+        this.total = (seconds * 20);
 
         this.countdown = seconds > -1;
         this.message = message;
 
-        handler.startTimer(message);
+        handler.startTimer(message + (countdown ? " " + timeToString(remaining / 20) : ""));
 
         cancel();
-        jobId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 20);
+        jobId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 0, 1L);
     }
 
     /**
@@ -116,6 +126,15 @@ public class TimerRunnable implements Runnable {
     public boolean isRunning() {
         BukkitScheduler sch = Bukkit.getScheduler();
         return sch.isCurrentlyRunning(jobId) || sch.isQueued(jobId);
+    }
+
+    /**
+     * Get the handler for the timer.
+     *
+     * @return The timer handler.
+     */
+    public TimerHandler getHandler() {
+        return handler;
     }
 
     private static final long SECONDS_PER_HOUR = 3600;

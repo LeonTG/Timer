@@ -1,10 +1,10 @@
 /*
- * Project: ActionTimer
+ * Project: Timer
  * Class: com.leontg77.timer.commands.TimerCommand
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Leon Vaktskjold <leontg77@gmail.com>.
+ * Copyright (c) 2016-2018 Leon Vaktskjold <leontg77@gmail.com>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@ package com.leontg77.timer.commands;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.leontg77.timer.Main;
+import com.leontg77.timer.handling.TimerHandler;
+import com.leontg77.timer.handling.handlers.BossBarHandler;
 import com.leontg77.timer.runnable.TimerRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -40,8 +42,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -50,10 +54,25 @@ import java.util.stream.Collectors;
  * @author LeonTG
  */
 public class TimerCommand implements CommandExecutor, TabCompleter {
-    private final TimerRunnable timer;
+    private final Main plugin;
 
-    public TimerCommand(TimerRunnable timer) {
-        this.timer = timer;
+    private final List<String> colors = Lists.newArrayList();
+    private final List<String> styles = Lists.newArrayList();
+
+    public TimerCommand(Main plugin) {
+        this.plugin = plugin;
+
+        try {
+            for (Object enumz : Class.forName("org.bukkit.boss.BarColor").getEnumConstants()) {
+                colors.add(enumz.toString().toLowerCase());
+            }
+
+            for (Object enumz : Class.forName("org.bukkit.boss.BarStyle").getEnumConstants()) {
+                styles.add(enumz.toString().toLowerCase());
+            }
+        } catch (ClassNotFoundException ex) {
+            plugin.getLogger().log(Level.WARNING, "Unable to find tab completable colors and styles for boss bars.", ex);
+        }
     }
 
     private static final String PERMISSION = "timer.manage";
@@ -66,29 +85,77 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(Main.PREFIX + "Usage: /timer <seconds|-1> <message> | /timer cancel");
+            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <seconds|-1> <message> §7| §c/timer cancel");
             return true;
         }
 
-        // check for cancelling
         if (args[0].equalsIgnoreCase("cancel")) {
-            if (!timer.isRunning()) {
-                sender.sendMessage(ChatColor.RED + "Timers is not running.");
+            if (!plugin.getRunnable().isRunning()) {
+                sender.sendMessage(ChatColor.RED + "There are no timers running.");
                 return true;
             }
 
-            timer.cancel();
+            plugin.getRunnable().cancel();
             sender.sendMessage(Main.PREFIX + "The timer has been cancelled.");
             return true;
         }
 
-        // check enough args for setting a timer
-        if (args.length < 2) {
-            sender.sendMessage(Main.PREFIX + "Usage: /timer <seconds> <message> | /timer -1 <message>");
+        if (args[0].equalsIgnoreCase("reload")) {
+            if (plugin.getRunnable().isRunning()) {
+                sender.sendMessage(ChatColor.RED + "Cancel the current timer before you can reloading.");
+                return true;
+            }
+
+            plugin.getRunnable().cancel();
+            plugin.reloadConfig();
+
+            sender.sendMessage(Main.PREFIX + "Timer config has been reloaded.");
             return true;
         }
 
-        if (timer.isRunning()) {
+        if (args[0].equalsIgnoreCase("update")) {
+            TimerHandler handler = plugin.getRunnable().getHandler();
+
+            if (!(handler instanceof BossBarHandler)) {
+                sender.sendMessage(ChatColor.RED + "Boss bar timer is disabled, coloring and style doesn't work in the action bar.");
+                return true;
+            }
+
+            BossBarHandler bossBar = (BossBarHandler) handler;
+
+            if (args.length == 1) {
+                sender.sendMessage(Main.PREFIX + "Usage: §c/timer update <color> [style]");
+                return true;
+            }
+
+            String color = args[1];
+            String style = "solid";
+
+            if (args.length > 2) {
+                style = args[2];
+            }
+
+            try {
+                bossBar.update(color.toUpperCase(), style.toUpperCase());
+
+                plugin.getConfig().set("bossbar.color", color);
+                plugin.getConfig().set("bossbar.style", style);
+                plugin.saveConfig();
+
+                sender.sendMessage(Main.PREFIX + "Boss bar settings have been updated.");
+            } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException ex) {
+                sender.sendMessage(ChatColor.RED + "The color or style you entered is invalid, use tab-complete!");
+                return true;
+            }
+            return true;
+        }
+
+        if (args.length < 2) {
+            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <seconds|-1> <message> §7| §c/timer cancel");
+            return true;
+        }
+
+        if (plugin.getRunnable().isRunning()) {
             sender.sendMessage(ChatColor.RED + "The timer is already running, cancel with /timer cancel.");
             return true;
         }
@@ -105,8 +172,8 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         String message = Joiner.on(' ').join(Arrays.copyOfRange(args, 1, args.length));
         message = ChatColor.translateAlternateColorCodes('&', message);
 
-        timer.startSendingMessage(message, seconds);
-        sender.sendMessage(Main.PREFIX + "The timer has started.");
+        plugin.getRunnable().startSendingMessage(message, seconds);
+        sender.sendMessage(Main.PREFIX + "The timer has been started.");
         return true;
     }
 
@@ -120,13 +187,23 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 1) {
             toReturn.add("cancel");
+            toReturn.add("reload");
+            toReturn.add("update");
         }
 
         if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("update")) {
+                return colors;
+            }
+
             toReturn.addAll(Bukkit.getOnlinePlayers()
                     .stream()
                     .map(Player::getName)
                     .collect(Collectors.toList()));
+        }
+
+        if (args.length == 3 && args[0].equalsIgnoreCase("update")) {
+            return styles;
         }
 
         return StringUtil.copyPartialMatches(args[args.length - 1], toReturn, Lists.newArrayList());
