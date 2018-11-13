@@ -18,7 +18,7 @@ ___
 
 `/timer reload` - *Reload the configuration.*
 
-`/timer update` - *Update the boss bar color and style, if enabled.*
+`/timer update <color> [style]` - *Update the boss bar color and style, if enabled.*
 
 **Permissions:**
 
