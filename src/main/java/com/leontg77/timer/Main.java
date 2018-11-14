@@ -46,15 +46,15 @@ import java.util.logging.Level;
  * @author LeonTG
  */
 public class Main extends JavaPlugin {
-	public static final String PREFIX = "§cTimer §8» §7";
-	
-	@Override
-	public void onEnable() {
+    public static final String PREFIX = "§cTimer §8» §7";
+    
+    @Override
+    public void onEnable() {
         reloadConfig();
         getCommand("timer").setExecutor(new TimerCommand(this));
     }
 
-	private TimerRunnable runnable = null;
+    private TimerRunnable runnable = null;
 
     /**
      * Get the current runnable for the timer.
@@ -65,18 +65,18 @@ public class Main extends JavaPlugin {
         return runnable;
     }
 
-	@Override
-	public void reloadConfig() {
-		super.reloadConfig();
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig();
 
-		if (getConfig().getConfigurationSection("bossbar") == null) {
+        if (getConfig().getConfigurationSection("bossbar") == null) {
             getConfig().set("bossbar.enabled", true);
             getConfig().set("bossbar.color", "pink");
             getConfig().set("bossbar.style", "solid");
             saveConfig();
         }
 
-		if (runnable != null && runnable.getHandler() instanceof Listener) {
+        if (runnable != null && runnable.getHandler() instanceof Listener) {
             HandlerList.unregisterAll((Listener) runnable.getHandler());
         }
 
@@ -92,7 +92,7 @@ public class Main extends JavaPlugin {
 
                 getLogger().warning("BossBars are not supported in pre Minecraft 1.9, defaulting to action bar.");
             }
-
+    
             try {
                 runnable = new TimerRunnable(this, new NewActionBarHandler(packetSender));
             } catch (Exception ex) {
@@ -102,5 +102,5 @@ public class Main extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);
             setEnabled(false);
         }
-	}
+    }
 }
