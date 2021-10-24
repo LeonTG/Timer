@@ -25,6 +25,8 @@ ___
 **Permissions:**
 
 `timer.manage` - *Permission to use* `/timer`*.*
+
+`timer.command` - *Permission to use* `/timer command` (gives code execution privileges!!!)
 ___
 
 [**Download**](https://github.com/LeonTG/Timer/releases)

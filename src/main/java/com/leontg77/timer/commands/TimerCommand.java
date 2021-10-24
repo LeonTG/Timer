@@ -76,6 +76,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
     }
 
     private static final String PERMISSION = "timer.manage";
+    private static final String PERMISSION_COMMAND = "timer.command";
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label,String[] args) {
@@ -153,6 +154,11 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("command")) {
             TimerHandler handler = plugin.getRunnable().getHandler();
 
+            if (!sender.hasPermission(PERMISSION_COMMAND)) {
+                sender.sendMessage(ChatColor.RED + "You can't use that command.");
+                return true;
+            }
+
             if (args.length == 1) {
                 sender.sendMessage(Main.PREFIX + "Usage: §c/timer command <command/reset>");
                 return true;
@@ -212,7 +218,9 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             toReturn.add("cancel");
             toReturn.add("reload");
             toReturn.add("update");
-            toReturn.add("command");
+            if (!sender.hasPermission(PERMISSION_COMMAND)) {
+                toReturn.add("command");
+            }
         }
 
         if (args.length == 2) {
