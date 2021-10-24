@@ -31,9 +31,11 @@ import com.leontg77.timer.Main;
 import com.leontg77.timer.handling.TimerHandler;
 import com.leontg77.timer.handling.handlers.BossBarHandler;
 import org.bukkit.Bukkit;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -45,9 +47,10 @@ public class TimerRunnable implements Runnable {
     private final TimerHandler handler;
     private final Main plugin;
 
-    public TimerRunnable(Main plugin, TimerHandler handler) {
+    public TimerRunnable(Main plugin, TimerHandler handler, String command) {
         this.handler = handler;
         this.plugin = plugin;
+        this.command = command;
 
         if (handler instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) handler, plugin);
@@ -58,6 +61,7 @@ public class TimerRunnable implements Runnable {
     private int jobId = -1;
 
     private String message;
+    private String command;
 
     private int remaining = 0;
     private int total = 0;
@@ -74,6 +78,10 @@ public class TimerRunnable implements Runnable {
 
         if (countdown) {
             if (remaining == 0) {
+                if (command.length() > 0) {
+                    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+                    Bukkit.dispatchCommand(console, command);
+                }
                 cancel();
                 return;
             }
@@ -171,5 +179,14 @@ public class TimerRunnable implements Runnable {
 
         output.append(seconds).append('s');
         return output.toString();
+    }
+
+    /**
+     * Updates the command to run on completion.
+     *
+     * @param command The command to run.
+     */
+    public void update(String command) {
+        this.command = command;
     }
 }
