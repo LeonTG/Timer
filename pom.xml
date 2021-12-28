@@ -6,7 +6,7 @@
 
     <groupId>com.leontg77</groupId>
     <artifactId>timer</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
     <name>Timer</name>
 
     <properties>
@@ -22,59 +22,43 @@
     </repositories>
 
     <dependencies>
+        <!-- Spigot Dependency, 1.9.2 for new action bar API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>paperspigot</artifactId>
-            <version>1.8.8</version>
+            <artifactId>spigot-api</artifactId>
+            <version>1.9.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
-    <!-- Build configuration taken from https://github.com/Eluinhost/UHC -->
-
     <build>
+        <defaultGoal>clean package</defaultGoal>
+        <finalName>Timer</finalName>
+
         <resources>
             <resource>
                 <targetPath>.</targetPath>
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>plugin.yml</include>
+                    <include>*.yml</include>
                 </includes>
             </resource>
         </resources>
+
         <plugins>
+            <!-- Plugin for compiling a java jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.8.1</version>
+
                 <configuration>
                     <!-- Value is inverted for some reason -->
                     <useIncrementalCompilation>false</useIncrementalCompilation>
+
                     <source>8</source>
                     <target>8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <minimizeJar>true</minimizeJar>
-                    <relocations>
-                        <relocation>
-                            <pattern>org.apache.commons.csv</pattern>
-                            <shadedPattern>${project.groupId}.${project.artifactId}.shaded.csv</shadedPattern>
-                        </relocation>
-                    </relocations>
                 </configuration>
             </plugin>
         </plugins>

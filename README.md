@@ -33,4 +33,4 @@ ___
 
 [**Source Code**](https://github.com/LeonTG/Timer)
 
-*This has been tested on the latest spigot 1.8.8 & 1.12.2 build.*
+*This has been tested on the latest spigot 1.8.8, 1.12.2 & 1.17.2 builds.*

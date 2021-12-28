@@ -48,8 +48,8 @@ public class OldActionBarHandler implements TimerHandler {
     private final Constructor<?> componentConstructor;
     private final Constructor<?> packetConstructor;
 
-    public OldActionBarHandler(PacketSender packetSender) throws ClassNotFoundException, NoSuchMethodException {
-        this.packetSender = packetSender;
+    public OldActionBarHandler() throws ClassNotFoundException, NoSuchMethodException, NoSuchFieldException {
+        this.packetSender = new PacketSender();
 
         this.componentConstructor = ReflectionUtils.getNMSClass("ChatComponentText").getConstructor(String.class);
         this.packetConstructor = ReflectionUtils.getNMSClass("PacketPlayOutChat").getConstructor(ReflectionUtils.getNMSClass("IChatBaseComponent"), byte.class);

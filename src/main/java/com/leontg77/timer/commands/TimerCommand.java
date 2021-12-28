@@ -152,8 +152,6 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("command")) {
-            TimerHandler handler = plugin.getRunnable().getHandler();
-
             if (!sender.hasPermission(PERMISSION_COMMAND)) {
                 sender.sendMessage(ChatColor.RED + "You can't use that command.");
                 return true;
@@ -174,6 +172,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             }
 
             plugin.getRunnable().update(command);
+
             plugin.getConfig().set("timer.command", command);
             plugin.saveConfig();
             return true;

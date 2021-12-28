@@ -86,7 +86,6 @@ public class Main extends JavaPlugin {
         }
 
         try {
-            PacketSender packetSender = new PacketSender();
             FileConfiguration config = getConfig();
 
             if (config.getBoolean("bossbar.enabled")) {
@@ -99,9 +98,9 @@ public class Main extends JavaPlugin {
             }
     
             try {
-                runnable = new TimerRunnable(this, new NewActionBarHandler(packetSender), config.getString("timer.command",""));
+                runnable = new TimerRunnable(this, new NewActionBarHandler(), config.getString("timer.command",""));
             } catch (Exception ex) {
-                runnable = new TimerRunnable(this, new OldActionBarHandler(packetSender), config.getString("timer.command",""));
+                runnable = new TimerRunnable(this, new OldActionBarHandler(), config.getString("timer.command",""));
             }
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);
