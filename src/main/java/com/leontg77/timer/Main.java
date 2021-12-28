@@ -76,6 +76,11 @@ public class Main extends JavaPlugin {
             saveConfig();
         }
 
+        if (getConfig().getConfigurationSection("timer") == null) {
+            getConfig().set("timer.command", "");
+            saveConfig();
+        }
+
         if (runnable != null && runnable.getHandler() instanceof Listener) {
             HandlerList.unregisterAll((Listener) runnable.getHandler());
         }
@@ -86,7 +91,7 @@ public class Main extends JavaPlugin {
 
             if (config.getBoolean("bossbar.enabled")) {
                 try {
-                    runnable = new TimerRunnable(this, new BossBarHandler(this, config.getString("bossbar.color", "pink"), config.getString("bossbar.style", "solid")));
+                    runnable = new TimerRunnable(this, new BossBarHandler(this, config.getString("bossbar.color", "pink"), config.getString("bossbar.style", "solid")), config.getString("timer.command",""));
                     return;
                 } catch (Exception ignored) {}
 
@@ -94,9 +99,9 @@ public class Main extends JavaPlugin {
             }
     
             try {
-                runnable = new TimerRunnable(this, new NewActionBarHandler(packetSender));
+                runnable = new TimerRunnable(this, new NewActionBarHandler(packetSender), config.getString("timer.command",""));
             } catch (Exception ex) {
-                runnable = new TimerRunnable(this, new OldActionBarHandler(packetSender));
+                runnable = new TimerRunnable(this, new OldActionBarHandler(packetSender), config.getString("timer.command",""));
             }
         } catch (Exception ex) {
             getLogger().log(Level.SEVERE, "Failed to setup action timer plugin, are you using Minecraft 1.8 or higher?", ex);

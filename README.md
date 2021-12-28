@@ -20,9 +20,13 @@ ___
 
 `/timer update <color> [style]` - *Update the boss bar color and style, if enabled.*
 
+`/timer command <command/reset>` - *Set a command to execute when the timer stops.*
+
 **Permissions:**
 
 `timer.manage` - *Permission to use* `/timer`*.*
+
+`timer.command` - *Permission to use* `/timer command` (gives code execution privileges!!!)
 ___
 
 [**Download**](https://github.com/LeonTG/Timer/releases)
