@@ -43,8 +43,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -90,92 +89,84 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("cancel")) {
-            if (!plugin.getRunnable().isRunning()) {
-                sender.sendMessage(ChatColor.RED + "There are no timers running.");
+        switch (args[0].toLowerCase(Locale.ENGLISH)) {
+            case "cancel": {
+                if (!plugin.getRunnable().isRunning()) {
+                    sender.sendMessage(ChatColor.RED + "There are no timers running.");
+                    return true;
+                }
+
+                plugin.getRunnable().cancel();
+                sender.sendMessage(Main.PREFIX + "The timer has been cancelled.");
                 return true;
             }
+            case "reload": {
+                if (plugin.getRunnable().isRunning()) {
+                    sender.sendMessage(ChatColor.RED + "Cancel the current timer before you can reloading.");
+                    return true;
+                }
 
-            plugin.getRunnable().cancel();
-            sender.sendMessage(Main.PREFIX + "The timer has been cancelled.");
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("reload")) {
-            if (plugin.getRunnable().isRunning()) {
-                sender.sendMessage(ChatColor.RED + "Cancel the current timer before you can reloading.");
+                plugin.getRunnable().cancel();
+                plugin.reloadConfig();
+                sender.sendMessage(Main.PREFIX + "Timer config has been reloaded.");
                 return true;
             }
+            case "update": {
+                if (args.length == 1) {
+                    sender.sendMessage(Main.PREFIX + "Usage: §c/timer update <color> [style]");
+                    return true;
+                }
 
-            plugin.getRunnable().cancel();
-            plugin.reloadConfig();
+                TimerHandler handler = plugin.getRunnable().getHandler();
 
-            sender.sendMessage(Main.PREFIX + "Timer config has been reloaded.");
-            return true;
-        }
+                if (!(handler instanceof BossBarHandler)) {
+                    sender.sendMessage(ChatColor.RED + "Boss bar timer is disabled, coloring and style doesn't work in the action bar.");
+                    return true;
+                }
+                BossBarHandler bossBar = (BossBarHandler) handler;
 
-        if (args[0].equalsIgnoreCase("update")) {
-            TimerHandler handler = plugin.getRunnable().getHandler();
+                String color = args[1];
+                String style = args.length > 2 ? args[2] : "solid";
 
-            if (!(handler instanceof BossBarHandler)) {
-                sender.sendMessage(ChatColor.RED + "Boss bar timer is disabled, coloring and style doesn't work in the action bar.");
+                try {
+                    bossBar.update(color.toUpperCase(), style.toUpperCase());
+
+                    plugin.getConfig().set("bossbar.color", color);
+                    plugin.getConfig().set("bossbar.style", style);
+                    plugin.saveConfig();
+
+                    sender.sendMessage(Main.PREFIX + "Boss bar settings have been updated.");
+                } catch (ReflectiveOperationException ex) {
+                    sender.sendMessage(ChatColor.RED + "The color or style you entered is invalid, use tab-complete!");
+                }
                 return true;
             }
+            case "command": {
+                if (!sender.hasPermission(PERMISSION_COMMAND)) {
+                    sender.sendMessage(ChatColor.RED + "You can't use that command.");
+                    return true;
+                }
 
-            BossBarHandler bossBar = (BossBarHandler) handler;
+                if (args.length == 1) {
+                    sender.sendMessage(Main.PREFIX + "Usage: §c/timer command <command/reset>");
+                    return true;
+                }
 
-            if (args.length == 1) {
-                sender.sendMessage(Main.PREFIX + "Usage: §c/timer update <color> [style]");
-                return true;
-            }
+                String command = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
-            String color = args[1];
-            String style = "solid";
+                if (command.equalsIgnoreCase("reset")){
+                    command = "";
+                    sender.sendMessage(Main.PREFIX + "The command has been reset.");
+                } else {
+                    sender.sendMessage(Main.PREFIX + "The command has been updated.");
+                }
 
-            if (args.length > 2) {
-                style = args[2];
-            }
+                plugin.getRunnable().update(command);
 
-            try {
-                bossBar.update(color.toUpperCase(), style.toUpperCase());
-
-                plugin.getConfig().set("bossbar.color", color);
-                plugin.getConfig().set("bossbar.style", style);
+                plugin.getConfig().set("timer.command", command);
                 plugin.saveConfig();
-
-                sender.sendMessage(Main.PREFIX + "Boss bar settings have been updated.");
-            } catch (NoSuchFieldException | IllegalAccessException | InvocationTargetException ex) {
-                sender.sendMessage(ChatColor.RED + "The color or style you entered is invalid, use tab-complete!");
                 return true;
             }
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("command")) {
-            if (!sender.hasPermission(PERMISSION_COMMAND)) {
-                sender.sendMessage(ChatColor.RED + "You can't use that command.");
-                return true;
-            }
-
-            if (args.length == 1) {
-                sender.sendMessage(Main.PREFIX + "Usage: §c/timer command <command/reset>");
-                return true;
-            }
-
-            String command = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-
-            if (command.equalsIgnoreCase("reset")){
-                command = "";
-                sender.sendMessage(Main.PREFIX + "The command has been reset.");
-            } else {
-                sender.sendMessage(Main.PREFIX + "The command has been updated.");
-            }
-
-            plugin.getRunnable().update(command);
-
-            plugin.getConfig().set("timer.command", command);
-            plugin.saveConfig();
-            return true;
         }
 
         if (args.length < 2) {
@@ -189,7 +180,6 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         int seconds;
-
         try {
             seconds = Integer.parseInt(args[0]);
         } catch (Exception ex) {
@@ -197,7 +187,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String message = Joiner.on(' ').join(Arrays.copyOfRange(args, 1, args.length));
+        String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         message = ChatColor.translateAlternateColorCodes('&', message);
 
         plugin.getRunnable().startSendingMessage(message, seconds);
@@ -208,35 +198,31 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission(PERMISSION)) {
-            return null;
+            return Collections.emptyList();
         }
 
-        List<String> toReturn = Lists.newArrayList();
+        List<String> toReturn = null;
 
         if (args.length == 1) {
+            toReturn = new ArrayList<>();
             toReturn.add("cancel");
             toReturn.add("reload");
             toReturn.add("update");
-            if (!sender.hasPermission(PERMISSION_COMMAND)) {
+            if (sender.hasPermission(PERMISSION_COMMAND)) {
                 toReturn.add("command");
             }
         }
 
-        if (args.length == 2) {
-            if (args[0].equalsIgnoreCase("update")) {
-                return colors;
-            }
-
-            toReturn.addAll(Bukkit.getOnlinePlayers()
-                    .stream()
-                    .map(Player::getName)
-                    .collect(Collectors.toList()));
+        if (args.length == 2 && args[0].equalsIgnoreCase("update")) {
+            toReturn = colors;
         }
 
         if (args.length == 3 && args[0].equalsIgnoreCase("update")) {
-            return styles;
+            toReturn = styles;
         }
 
-        return StringUtil.copyPartialMatches(args[args.length - 1], toReturn, Lists.newArrayList());
+        if (toReturn == null) // no suitable completion
+            return Collections.emptyList();
+        return StringUtil.copyPartialMatches(args[args.length - 1], toReturn, new ArrayList<>());
     }
 }
