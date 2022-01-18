@@ -45,6 +45,8 @@ import org.bukkit.util.StringUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -170,7 +172,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <seconds|-1> <message> §7| §c/timer cancel");
+            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <duration/seconds> <message> §7| §c/timer cancel");
             return true;
         }
 
@@ -181,9 +183,9 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
 
         int seconds;
         try {
-            seconds = Integer.parseInt(args[0]);
+            seconds = parseTime(args[0]);
         } catch (Exception ex) {
-            sender.sendMessage(ChatColor.RED + "'" + args[0] + "' is not a valid time.");
+            sender.sendMessage(ChatColor.RED + ex.getMessage());
             return true;
         }
 
@@ -193,6 +195,39 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         plugin.getRunnable().startSendingMessage(message, seconds);
         sender.sendMessage(Main.PREFIX + "The timer has been started.");
         return true;
+    }
+
+    public static final Pattern DURATION_REGEX = Pattern.compile("^(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?$");
+    public static int parseTime(String time) throws IllegalArgumentException {
+        if ("".equals(time))
+            throw new IllegalArgumentException("Time is empty");
+        if ("permanent".equalsIgnoreCase(time))
+            return -1;
+        Matcher matcher = DURATION_REGEX.matcher(time.toLowerCase(Locale.ENGLISH));
+        int seconds = 0;
+        if (matcher.matches()) { // duration
+            if (matcher.group(1) != null) { // day
+                seconds += Integer.parseInt(matcher.group(1)) * 86400;
+            }
+            if (matcher.group(2) != null) { // hour
+                seconds += Integer.parseInt(matcher.group(2)) * 3600;
+            }
+            if (matcher.group(3) != null) { // minute
+                seconds += Integer.parseInt(matcher.group(3)) * 60;
+            }
+            if (matcher.group(4) != null) { // second
+                seconds += Integer.parseInt(matcher.group(4));
+            }
+        } else {
+            try {
+                seconds = Integer.parseInt(time);
+            } catch (NumberFormatException ignored) {
+                throw new IllegalArgumentException("'" + time + "' is not a valid number or duration");
+            }
+        }
+        if (seconds == 0 || seconds < -1)
+            throw new IllegalArgumentException("Time cannot be 0 or less than -1");
+        return seconds;
     }
 
     @Override
