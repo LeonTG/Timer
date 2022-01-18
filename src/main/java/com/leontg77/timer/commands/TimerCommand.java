@@ -27,27 +27,21 @@
 
 package com.leontg77.timer.commands;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.leontg77.timer.Main;
 import com.leontg77.timer.handling.TimerHandler;
 import com.leontg77.timer.handling.handlers.BossBarHandler;
-import com.leontg77.timer.runnable.TimerRunnable;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Timer command class.
@@ -87,7 +81,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <seconds|-1> <message> §7| §c/timer cancel");
+            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <duration/seconds/permanent> <message> §7| §c/timer cancel");
             return true;
         }
 
@@ -190,7 +184,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <duration/seconds> <message> §7| §c/timer cancel");
+            sender.sendMessage(Main.PREFIX + "Usage: §c/timer <duration/seconds/permanent> <message> §7| §c/timer cancel");
             return true;
         }
 
