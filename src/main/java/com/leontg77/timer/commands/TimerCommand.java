@@ -169,6 +169,24 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
                 plugin.saveConfig();
                 return true;
             }
+            case "setmessage": {
+                if (!plugin.getRunnable().isRunning()) {
+                    sender.sendMessage(ChatColor.RED + "There are no timers running.");
+                    return true;
+                }
+
+                if (args.length == 1) {
+                    sender.sendMessage(Main.PREFIX + "Usage: §c/timer setmessage <message>");
+                    return true;
+                }
+
+                String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                message = ChatColor.translateAlternateColorCodes('&', message);
+
+                plugin.getRunnable().updateMessage(message);
+                sender.sendMessage(Main.PREFIX + "The message has been updated.");
+                return true;
+            }
         }
 
         if (args.length < 2) {
@@ -243,6 +261,7 @@ public class TimerCommand implements CommandExecutor, TabCompleter {
             toReturn.add("cancel");
             toReturn.add("reload");
             toReturn.add("update");
+            toReturn.add("setmessage");
             if (sender.hasPermission(PERMISSION_COMMAND)) {
                 toReturn.add("command");
             }
