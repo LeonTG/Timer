@@ -189,4 +189,12 @@ public class TimerRunnable implements Runnable {
     public void update(String command) {
         this.command = command;
     }
+
+    /**
+     * Updates the message shown.
+     * @param message The message
+     */
+    public void updateMessage(String message) {
+        this.message = message;
+    }
 }
